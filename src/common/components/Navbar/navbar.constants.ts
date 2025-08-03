@@ -4,9 +4,9 @@ type NavbarOption = {
   };
   
   export const NavbarOptions: NavbarOption[] = [
-    { name: 'Explore', sendTo: '/trip' },
+    { name: 'Explore', sendTo: '/trips' },
     { name: 'Stories', sendTo: '/story' },
-    { name: 'Create', sendTo: '' },
+    { name: 'Create', sendTo: '/trips/create' },
     { name: 'About', sendTo: '/about' },
   ];
   

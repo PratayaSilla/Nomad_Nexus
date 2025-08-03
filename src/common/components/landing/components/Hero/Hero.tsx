@@ -13,10 +13,10 @@ export default function Hero() {
     const router = useRouter()
     
     return (
-        <div className='px-48'>
+        <div className='px-8 md:px-48'>
             <div className="py-8">
                 <div
-                    className="flex min-h-[580px] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center rounded-lg"
+                    className="flex min-h-[520px] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center rounded-lg"
                     style={{ backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url(\"https://lh3.googleusercontent.com/aida-public/AB6AXuCBOHnfpURbJJlwgbOMLt9Lgh9XhU0sht5PQteqhVrvo3KgxTbb7ZWgLmIhHF8y4oGycHVMosAk4FwV1azaObg2yZXRq6yKnwBU7O8wSYqMAbintFVziS1ukA4XoNrbVbnmj7qltPO2DCQtsA5xvdc_dpBUK0OljF1RB2bSRGdxsiMZknuCNdanHVaelEojNtrfyr5DK3DjhBdW52tvVmpBdMq_DLzJNnlTsqraNIH9KMWGoVXX3eiuvLyCeIBDT5O34Zst4x3mwE0\")' }}>
                     <div className="flex flex-col gap-2">
                         <h1 className="text-white text-3xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl">
@@ -26,12 +26,7 @@ export default function Hero() {
                             Discover unique destinations and experiences tailored for travellers
                         </h2>
                     </div>
-                    <button 
-                        className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#0c77f2] text-white text-sm font-bold leading-normal tracking-[0.015em] @[480px]:h-12 @[480px]:px-5 @[480px]:text-base transition-all duration-100 ease-in-out active:scale-98"
-                        onClick={() => {}}
-                    >
-                        <span className="truncate">Featured Destinations</span>
-                    </button>
+                    
                 </div>
             </div>
             <ExploreTrips />

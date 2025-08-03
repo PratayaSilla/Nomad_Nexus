@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import baseAPI from '../baseApi';
 import axios from 'axios';
 import { logError } from '@/common/utils/logError';
-import { notify } from '@/common/utils/notify';
 
 export interface UsePostMutationOptions<T, B> {
   withCredentials?: boolean;
@@ -25,7 +24,6 @@ export const useRawPostMutation = <T, B = unknown>(
     },
     onSuccess: () => {},
     onError: (error: unknown) => {
-      notify.error("Error Submitting the Form")
       if (axios.isAxiosError(error)) {
         logError({
           error: error.response?.data?.message || error.message,

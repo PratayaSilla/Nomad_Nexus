@@ -54,7 +54,7 @@ const blogSchema = new Schema<IBlog>(
           type: Schema.Types.ObjectId, 
           ref: 'User' 
         },
-        message: {
+        comment: {
           type: String
         },
         createdAt: { 

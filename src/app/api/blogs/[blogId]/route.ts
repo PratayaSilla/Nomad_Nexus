@@ -12,7 +12,8 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    const { blogId } = params;
+
+    const { blogId } = await params;
 
     const blog = await Blog.findById(blogId)
       .populate('author', 'name email avatar')

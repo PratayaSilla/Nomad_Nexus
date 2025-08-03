@@ -1,11 +1,14 @@
 'use client'
 
 import React, { useState } from 'react';
-import BlogPreview from './[blogID]/components/BlogPreview';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import BlogPreview from './components/BlogPreview';
+import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react';
 import { useGetData } from '@/common/hooks/services/methods/useGETData';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import Loader from '@/common/components/Loader/Loader';
+import Button from '@/common/components/atoms/Button';
+
 
 interface Blog {
   _id: string;
@@ -44,10 +47,17 @@ export default function Stories() {
       <div className="flex flex-wrap justify-between gap-3 p-4">
         <div className="flex w-full items-center justify-between gap-3">
           <div>
-          <p className="text-[#101618] text-[32px] font-bold">Traveler Blogs</p>
-          <p className="text-[#5c7a8a] text-sm">Explore stories and insights from fellow travelers.</p>
+          <p className="text-text-primary text-[32px] font-bold">Traveller Stories</p>
+          <p className="text-text-secondary text-sm ml-1">Explore stories and insights from fellow travelers.</p>
           </div>
-          {status === 'authenticated' && <div className='cursor-pointer' onClick={() => router.push('/story/create')}>+Create Trip</div>}
+          {(status === 'authenticated') && (
+              <Button 
+                  className='cursor-pointer flex gap-2 bg-primary rounded-lg text-text-primary' 
+                  onClick={() => router.push('/story/create')}
+              >
+                <CirclePlus size={20}/>
+                <span>Create Trip</span>
+              </Button>)}
         </div>
       </div>
       <div className="flex px-4 py-3">
@@ -56,7 +66,7 @@ export default function Stories() {
             <label
               key={type}
               className={`flex cursor-pointer h-full grow items-center justify-center px-2 rounded-xl text-sm font-medium text-[#5c7a8a]
-                ${filter === type ? 'bg-gray-50 shadow text-[#101618]' : ''}`}
+                ${filter === type ? ' shadow text-[#101618]' : ''}`}
             >
               <span className="truncate">{type}</span>
               <input
@@ -74,7 +84,7 @@ export default function Stories() {
         </div>
       </div>
       {loading ? (
-        <div className="flex justify-center items-center py-10 text-[#5c7a8a]">Loading...</div>
+        <Loader/>
       ) : (
         filteredPosts.map((post, index) => (
           <BlogPreview

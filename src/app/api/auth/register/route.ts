@@ -9,7 +9,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await connectToDatabase();
 
     const body = await req.json();
-    const { email, password, fullName } = body;
+    const { email, password, fullName, username } = body;
 
     if (!email || !password || !fullName) {
       return ApiError(400, 'All fields are required');
@@ -18,6 +18,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return ApiError(400, 'User with this email already exists');
+    }
+
+    const existingUserName = await User.findOne({ username });
+    if (existingUserName) {
+      return ApiError(400, 'User with this username already exists');
     }
 
     const provider = {
@@ -29,7 +34,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email,
       password,
       fullName,
-      provider
+      provider,
+      username
     });
 
     if (!user) {

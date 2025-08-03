@@ -1,13 +1,18 @@
 import React from 'react'
+import { Navbar } from '@/common/components';
 
-interface LayoutProps {
-  children: React.ReactNode
-}
 
-const layout = ({ children }: LayoutProps) => {
+type Props = {
+  children: React.ReactNode;
+};
+
+const layout = ({ children }: Props) => {
   return (
-    <div className='px-[16rem]'>   
+    <div className='bg-background min-h-[100vh]'>
+      <Navbar />
+      <div className='px-[0.5rem] md:px-[16rem] '>
         {children}
+      </div>
     </div>
   )
 }

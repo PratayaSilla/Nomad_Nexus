@@ -25,7 +25,6 @@ export function usePOSTData<T, B = unknown>(
     setError(null);
     try {
       const result = await postAsync(body);
-      // Check for logical API errors (success: false)
       if (
         result &&
         typeof result === 'object' &&
@@ -42,10 +41,18 @@ export function usePOSTData<T, B = unknown>(
       return result;
     } catch (err: unknown) {
       setError(
-        err && typeof err === 'object' && 'message' in err
-          ? String((err as { message?: unknown }).message)
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response: unknown }).response === 'object' &&
+        'data' in (err as { response: { data: unknown } }).response &&
+        typeof (err as { response: { data: { message: unknown } } }).response.data.message === 'string'
+          ? (err as { response: { data: { message: string } } }).response.data.message
           : 'Request failed'
       );
+      
+      
+      
       if (onError) onError(err);
       return null;
     }

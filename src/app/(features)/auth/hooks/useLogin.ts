@@ -1,7 +1,11 @@
+'use client'
+
 
 import { logError } from '@/common/utils/logError';
 import { signIn } from "next-auth/react";
 import { notify } from '@/common/utils/notify';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 export enum providers  {
     GOOGLE = 'google',
@@ -10,6 +14,17 @@ export enum providers  {
   } 
   
 export const useLogin = (method: providers) => {
+
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const error = searchParams.get('error')
+        useEffect(() => {
+            if (error) {
+              router.push('/')
+            }
+          }, [error,router])
+        
+
     
     if (method === providers.CREDENTIALS) {
         const post = async (values: { email: string; password: string }) => {
@@ -17,13 +32,15 @@ export const useLogin = (method: providers) => {
                 const result = await signIn(method, {
                     email: values.email,
                     password: values.password,
-                    redirect: false
+                    callbackUrl : '/',
+                    onError : () => router.push('/')
                 });
 
                     if (result?.ok) {
                         notify.success('Login successful!')
                     }
                     if (result?.error) {
+                        router.push('/')
                         notify.error(result?.error)
                     }      
             } catch (error) {
@@ -42,11 +59,17 @@ export const useLogin = (method: providers) => {
 
         const signInWithGoogle = async () => {
             try {
-                const res = await signIn(providers.GOOGLE)
+                const res = await signIn(
+                        providers.GOOGLE, 
+                        { 
+                            callbackUrl : '/',
+                            onError : () => router.push('/') 
+                        })
                 if (res?.ok) {
                     notify.success('Google login successful!')
                 }
                 if (res?.error) {
+                    router.push('/')
                     notify.error(res.error)
                 }
             } catch (error) {
@@ -64,11 +87,16 @@ export const useLogin = (method: providers) => {
     if (method === providers.FACEBOOK) {
         const signInWithFacebook = async () => {
             try {
-                const res = await signIn(providers.FACEBOOK)
+                const res = await signIn(
+                        providers.FACEBOOK, 
+                        { 
+                            callbackUrl : 'http://localhost:8000/auth', 
+                        })
                 if (res?.ok) {
                     notify.success('Google login successful!')
                 }
                 if (res?.error) {
+                    router.push('/')
                     notify.error(res.error)
                 }
             } catch (error) {

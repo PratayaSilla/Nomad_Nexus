@@ -10,6 +10,7 @@ declare global {
 declare module "next-auth" {
   interface User {
     _id?: string;
+    fullName : string;
   }
   interface Session {
     user?: User;
