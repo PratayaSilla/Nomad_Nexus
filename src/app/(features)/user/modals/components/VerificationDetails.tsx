@@ -1,11 +1,8 @@
 import React from 'react'
 import InputField from '@/common/fields/Input';
 
-type Props = {
-    userData : object
-}
 
-const VerificationDetails = ({userData} : Props) => {
+const VerificationDetails = () => {
 
     const userFields = {
         address: {

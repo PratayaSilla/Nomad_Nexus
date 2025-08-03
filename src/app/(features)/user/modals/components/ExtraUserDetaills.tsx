@@ -3,11 +3,7 @@ import InputField from '@/common/fields/Input';
 import TextEditorField from '@/common/fields/TextEditorField'
 
 
-type Props = {
-    userData : object
-}
-
-const ExtraUserDetaills = ({userData} : Props) => {
+const ExtraUserDetaills = () => {
 
     const userFields = {
         socialMedias: {

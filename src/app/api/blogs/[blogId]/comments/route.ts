@@ -3,6 +3,18 @@ import { connectToDatabase } from '@/server/db/db';
 import { Blog } from '@/server/models/Blogs.model';
 import { ApiSuccess } from '@/server/utils/ApiResponse';
 import { ApiError } from '@/server/utils/ApiError';
+import { Types } from 'mongoose';
+
+interface Comment {
+  _id: Types.ObjectId;
+  user: {
+    _id: Types.ObjectId;
+    name: string;
+    avatar: string;
+  };
+  message: string;
+  createdAt: Date;
+}
 
 // GET comments for a blog
 export async function GET(
@@ -20,7 +32,7 @@ export async function GET(
     const blog = await Blog.findById(blogId)
       .populate('comments.user', 'name avatar')
       .select('comments')
-      .lean();
+      .lean<{ comments: Comment[] }>();
 
     if (!blog) {
       return ApiError(404, 'Blog not found');
@@ -28,7 +40,7 @@ export async function GET(
 
     const skip = (page - 1) * limit;
     const comments = blog.comments
-      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(skip, skip + limit);
 
     const total = blog.comments.length;
@@ -46,10 +58,7 @@ export async function GET(
       }
     });
   } catch (error: unknown) {
-    let message = 'Failed to retrieve comments';
-    if (error instanceof Error) {
-      message = error.message;
-    }
+    const message = error instanceof Error ? error.message : 'Failed to retrieve comments';
     return ApiError(500, message, error);
   }
 }
@@ -63,23 +72,14 @@ export async function POST(
     await connectToDatabase();
     const { blogId } = params;
     const body = await req.json();
-    const { userId, message } = body;
+    const { userId, message }: { userId?: string; message?: string } = body;
 
-    if (!userId) {
-      return ApiError(400, 'User ID is required');
-    }
-    if (!message || message.trim().length === 0) {
-      return ApiError(400, 'Comment message is required');
-    }
-    if (message.length > 1000) {
-      return ApiError(400, 'Comment must be less than 1000 characters');
-    }
+    if (!userId) return ApiError(400, 'User ID is required');
+    if (!message || message.trim().length === 0) return ApiError(400, 'Comment message is required');
+    if (message.length > 1000) return ApiError(400, 'Comment must be less than 1000 characters');
 
-    // Check if blog exists
     const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return ApiError(404, 'Blog not found');
-    }
+    if (!blog) return ApiError(404, 'Blog not found');
 
     const newComment = {
       user: userId,
@@ -93,14 +93,11 @@ export async function POST(
       { new: true }
     ).populate('comments.user', 'name avatar');
 
-    const addedComment = updatedBlog?.comments[updatedBlog.comments.length - 1];
+    const addedComment = updatedBlog?.comments.at(-1);
 
     return ApiSuccess(201, 'Comment added successfully', addedComment);
   } catch (error: unknown) {
-    let message = 'Failed to add comment';
-    if (error instanceof Error) {
-      message = error.message;
-    }
+    const message = error instanceof Error ? error.message : 'Failed to add comment';
     return ApiError(500, message, error);
   }
-} 
+}

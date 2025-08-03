@@ -2,11 +2,7 @@ import React from 'react'
 import InputField from '@/common/fields/Input';
 import ImageUploadField from '@/common/fields/ImageUploadField';
 
-type Props = {
-    userData : object
-}
-
-const BasicsUserDetails = ({userData} : Props) => {
+const BasicsUserDetails = () => {
 
     const userFields = {
         fullName: {

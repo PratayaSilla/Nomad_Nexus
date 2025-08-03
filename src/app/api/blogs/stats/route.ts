@@ -3,6 +3,15 @@ import { connectToDatabase } from '@/server/db/db';
 import { Blog } from '@/server/models/Blogs.model';
 import { ApiSuccess } from '@/server/utils/ApiResponse';
 import { ApiError } from '@/server/utils/ApiError';
+import { Types } from 'mongoose';
+
+interface BlogDoc {
+  title: string;
+  likes?: Types.ObjectId[];
+  comments?: Types.ObjectId[];
+  author?: { name?: string };
+  createdAt?: Date;
+}
 
 // GET blog statistics
 export async function GET(req: NextRequest) {
@@ -11,12 +20,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const author = searchParams.get('author');
 
-    const filter: any = {};
-    if (author) {
-      filter.author = author;
-    }
+    const filter: Record<string, unknown> = {};
+    if (author) filter.author = author;
 
-    // Get basic stats
     const [
       totalBlogs,
       publishedBlogs,
@@ -28,41 +34,33 @@ export async function GET(req: NextRequest) {
       popularTags,
       monthlyStats
     ] = await Promise.all([
-      // Total blogs
       Blog.countDocuments(filter),
-      
-      // Published blogs
       Blog.countDocuments({ ...filter, isPublished: true }),
-      
-      // Total likes across all blogs
+
       Blog.aggregate([
         { $match: filter },
         { $project: { likesCount: { $size: '$likes' } } },
         { $group: { _id: null, total: { $sum: '$likesCount' } } }
       ]),
-      
-      // Total comments across all blogs
+
       Blog.aggregate([
         { $match: filter },
         { $project: { commentsCount: { $size: '$comments' } } },
         { $group: { _id: null, total: { $sum: '$commentsCount' } } }
       ]),
-      
-      // Most liked blog
+
       Blog.findOne(filter)
-        .sort({ $expr: { $size: '$likes' } })
+        .sort({ 'likes.length': -1 })
         .populate('author', 'name')
         .select('title likes author')
-        .lean(),
-      
-      // Most commented blog
+        .lean<BlogDoc>(),
+
       Blog.findOne(filter)
-        .sort({ $expr: { $size: '$comments' } })
+        .sort({ 'comments.length': -1 })
         .populate('author', 'name')
         .select('title comments author')
-        .lean(),
-      
-      // Recent blogs (last 7 days)
+        .lean<BlogDoc>(),
+
       Blog.find({
         ...filter,
         createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
@@ -71,9 +69,8 @@ export async function GET(req: NextRequest) {
         .select('title createdAt author')
         .sort({ createdAt: -1 })
         .limit(5)
-        .lean(),
-      
-      // Popular tags
+        .lean<BlogDoc[]>(),
+
       Blog.aggregate([
         { $match: filter },
         { $unwind: '$tags' },
@@ -82,8 +79,7 @@ export async function GET(req: NextRequest) {
         { $limit: 10 },
         { $project: { tag: '$_id', count: 1, _id: 0 } }
       ]),
-      
-      // Monthly stats for the last 6 months
+
       Blog.aggregate([
         { $match: filter },
         {
@@ -125,7 +121,7 @@ export async function GET(req: NextRequest) {
         } : null,
       },
       recentActivity: {
-        recentBlogs: recentBlogs.map((blog: any) => ({
+        recentBlogs: recentBlogs.map((blog) => ({
           title: blog.title,
           createdAt: blog.createdAt,
           author: blog.author?.name || 'Unknown'
@@ -133,7 +129,12 @@ export async function GET(req: NextRequest) {
       },
       trends: {
         popularTags,
-        monthlyStats: monthlyStats.map((stat: any) => ({
+        monthlyStats: monthlyStats.map((stat: {
+          _id: { year: number; month: number };
+          count: number;
+          likes: number;
+          comments: number;
+        }) => ({
           month: `${stat._id.year}-${String(stat._id.month).padStart(2, '0')}`,
           blogs: stat.count,
           likes: stat.likes,
@@ -144,10 +145,7 @@ export async function GET(req: NextRequest) {
 
     return ApiSuccess(200, 'Blog statistics retrieved successfully', stats);
   } catch (error: unknown) {
-    let message = 'Failed to retrieve blog statistics';
-    if (error instanceof Error) {
-      message = error.message;
-    }
+    const message = error instanceof Error ? error.message : 'Failed to retrieve blog statistics';
     return ApiError(500, message, error);
   }
-} 
+}

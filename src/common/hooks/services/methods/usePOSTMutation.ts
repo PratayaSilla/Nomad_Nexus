@@ -5,13 +5,13 @@ import baseAPI from '../baseApi';
 import axios from 'axios';
 import { logError } from '@/common/utils/logError';
 
-export interface UsePostMutationOptions<T, B> {
+export interface UsePostMutationOptions<> {
   withCredentials?: boolean;
 }
 
 export const useRawPostMutation = <T, B = unknown>(
   url: string,
-  options: UsePostMutationOptions<T, B> = {}
+  options: UsePostMutationOptions = {}
 ) => {
   const {
     withCredentials = true,
